@@ -38,7 +38,7 @@ def replace_ai_number(input_string):
 
 st.set_page_config(layout='wide')
 st.title("EventMatrix")
-st.text("Uncover the Hottest Trends, Leading Domains, and Top Organizers for Meetups, Workshops, and Seminars.")
+st.text("Uncover the Hottest Trends, Top Keywords, and Leading Organizers for elevating IQM’s future Meet-ups!")
 conn=st.connection("postgresql", type="sql")
 df = conn.query('SELECT * FROM public.event_records;', ttl="10m")
 df['topic']=df['topic'].apply(lambda x:replace_ai_number(x))
