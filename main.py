@@ -37,6 +37,8 @@ def replace_ai_number(input_string):
     return result
 
 st.set_page_config(layout='wide')
+st.title("EventMatrix")
+st.text("Uncover the Hottest Trends, Leading Domains, and Top Organizers for Meetups, Workshops, and Seminars.")
 conn=st.connection("postgresql", type="sql")
 df = conn.query('SELECT * FROM public.event_records;', ttl="10m")
 df['topic']=df['topic'].apply(lambda x:replace_ai_number(x))
@@ -57,7 +59,7 @@ today = dt.date.today()
 default_start_date = today - dt.timedelta(days=30)
 
 d = st.date_input(
-    "Select your date range",
+    "Select Date Range for Events",
     (default_start_date, today),
     min_date,
     max_date,
