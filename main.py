@@ -72,7 +72,7 @@ if st.button("submit"):
 
     # Filter dataframe based on the selected date range
     filtered_df = df[(df['event_time'] >= pd.to_datetime(start_date)) & (df['event_time'] <= pd.to_datetime(end_date))]
-    print(filtered_df['topic'].tolist())
+
     average_registrations_event = filtered_df.groupby(['group_name', 'event_name']).agg({'rsvps': 'sum'}).reset_index()
 
     pie_data=filtered_df.groupby(['topic'])['rsvps'].sum().reset_index().sort_values('rsvps',ascending=False).head(10)
@@ -95,7 +95,7 @@ if st.button("submit"):
     #Seperator
     st.markdown('---')
 
-    fig = px.pie(pie_data, values='rsvps', names='topic', title="Top 10 Events per Topic (AI-Generated)")
+    fig = px.pie(pie_data, values='rsvps', names='topic', title="Top 10 Events per Topic (AI-Generated-Experimental)")
     st.plotly_chart(fig, use_container_width=True)
 
 
