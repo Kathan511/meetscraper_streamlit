@@ -56,33 +56,44 @@ max_date=df['event_time'].max()
 
 # User date range input for vacation next year
 today = dt.date.today()
-default_start_date = today - dt.timedelta(days=30)
+default_start_date = today - dt.timedelta(days=90)
 
 d = st.date_input(
     "Select Date Range for Events",
     (default_start_date, today),
     min_date,
     max_date,
-    format="MM.DD.YYYY",
+    format="DD.MM.YYYY",
 )
 
 if st.button("submit"):
+    
     start_date, end_date = d
 
     # Filter dataframe based on the selected date range
     filtered_df = df[(df['event_time'] >= pd.to_datetime(start_date)) & (df['event_time'] <= pd.to_datetime(end_date))]
+    print(filtered_df['topic'].tolist())
+    average_registrations_event = filtered_df.groupby(['group_name', 'event_name']).agg({'rsvps': 'sum'}).reset_index()
+
     pie_data=filtered_df.groupby(['topic'])['rsvps'].sum().reset_index().sort_values('rsvps',ascending=False).head(10)
-    st.dataframe(filtered_df)
+
+    #Seperator
+    st.markdown('---')
 
     #KPIs
-    col1,col2,col3,col4=st.columns(4)
+    col1,col2=st.columns(2)
+    col1.metric("*Total Number of Online Events*", len(filtered_df[filtered_df['event_type'] == 'ONLINE']))
+    col2.metric("*Total Number of Offline Events*", len(filtered_df[filtered_df['event_type'] == 'PHYSICAL']))
+    
+    #Cols for Top topic/group
+    top_col1,top_col2=st.columns(2)
 
-    col1.metric("Total Number of Online Events",len(filtered_df[filtered_df['event_type']=='ONLINE']))
-    col2.metric("Total Number of Offline Events",len(filtered_df[filtered_df['event_type']=='PHYSICAL']))
-    col3.metric("Top Topics by RSVP Count",filtered_df['topic'].value_counts().head(1).index[0])
-    col4.metric("Top Group by Event Organization",filtered_df['group_name'].value_counts().head(1).index[0])
+    # col2.metric("Total Number of Offline Events",)
+    top_col1.metric("*topic with highest registrations*",pie_data['topic'].iloc[0])
+    top_col2.metric("*Event Group with highest registrations*",filtered_df.groupby('group_name')['rsvps'].sum().reset_index().sort_values('rsvps',ascending=False).iloc[0]['group_name'])
 
-
+    #Seperator
+    st.markdown('---')
 
     fig = px.pie(pie_data, values='rsvps', names='topic', title="Top 10 Events per Topic (AI-Generated)")
     st.plotly_chart(fig, use_container_width=True)
@@ -90,13 +101,32 @@ if st.button("submit"):
 
     #top registrations across events
     rsvp_event_fig=px.bar(filtered_df.sort_values('rsvps',ascending=False).head(20),x='event_name'
-                          ,y='rsvps',hover_name='group_name',title="Top Events by Registrations")
+                          ,y='rsvps',hover_name='group_name',title="Top 20 Events by Registrations",labels={"event_name":"Event Name",
+                                                                                                         "rsvps":"RSVP"})
     st.plotly_chart(rsvp_event_fig,use_container_width=True)
 
     #top communities that organize events
-    group_fig=px.bar(df['group_name'].value_counts().reset_index().head(10),x='group_name'
-                          ,y='count',title="Top Event-Organizing Groups")
+    group_fig=px.bar(filtered_df.groupby('group_name')['rsvps'].sum().reset_index().sort_values('rsvps',ascending=False).head(20),x='group_name'
+                          ,y='rsvps',title="Top 20 Event Organizing Groups by Registrations",labels={"group_name":"Group Name","rsvps":"RSVP"})
+    group_fig.update_traces(marker_color='orange')
+
     st.plotly_chart(group_fig,use_container_width=True)
+
+    # Create a treemap chart
+    tree_fig = px.treemap(
+        average_registrations_event,
+        path=['group_name','event_name'],  # Path specifies the hierarchy; in this case, we only have one level
+        values='rsvps',        # Values represent the average registrations
+        title='Registrations per Event Group'
+    )
+
+    # Show the figure
+    st.plotly_chart(tree_fig,use_container_width=True)
+
+    #Seperator
+    st.markdown('---')
+
+    st.dataframe(filtered_df)
 
 
 
