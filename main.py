@@ -37,7 +37,7 @@ def replace_ai_number(input_string):
     return result
 
 st.set_page_config(layout='wide')
-st.title("EventMatrix")
+st.title("Event Activity Radar")
 st.text("Uncover the Hottest Trends, Top Keywords, and Leading Organizers for elevating IQM’s future Meet-ups!")
 conn=st.connection("postgresql", type="sql")
 df = conn.query('SELECT * FROM public.event_records;', ttl="10m")
@@ -89,13 +89,13 @@ if st.button("submit"):
     top_col1,top_col2=st.columns(2)
 
     # col2.metric("Total Number of Offline Events",)
-    top_col1.metric("*topic with highest registrations*",pie_data['topic'].iloc[0])
-    top_col2.metric("*Event Group with highest registrations*",filtered_df.groupby('group_name')['rsvps'].sum().reset_index().sort_values('rsvps',ascending=False).iloc[0]['group_name'])
+    top_col1.metric("*Topic with Highest Registrations*",f"{pie_data['topic'].iloc[0]}({pie_data['rsvps'].iloc[0]})")
+    top_col2.metric("*Organizer with Highest Registrations*",filtered_df.groupby('group_name')['rsvps'].sum().reset_index().sort_values('rsvps',ascending=False).iloc[0]['group_name'])
 
     #Seperator
     st.markdown('---')
 
-    fig = px.pie(pie_data, values='rsvps', names='topic', title="Top 10 Events per Topic (AI-Generated-Experimental)")
+    fig = px.pie(pie_data, values='rsvps', names='topic', title="Top 10 Events per Topic (Enhancements In Progress)")
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -107,7 +107,7 @@ if st.button("submit"):
 
     #top communities that organize events
     group_fig=px.bar(filtered_df.groupby('group_name')['rsvps'].sum().reset_index().sort_values('rsvps',ascending=False).head(20),x='group_name'
-                          ,y='rsvps',title="Top 20 Event Organizing Groups by Registrations",labels={"group_name":"Group Name","rsvps":"RSVP"})
+                          ,y='rsvps',title="Top 20 Organizers by Registrations",labels={"group_name":"Group Name","rsvps":"RSVP"})
     group_fig.update_traces(marker_color='orange')
 
     st.plotly_chart(group_fig,use_container_width=True)
@@ -117,7 +117,7 @@ if st.button("submit"):
         average_registrations_event,
         path=['group_name','event_name'],  # Path specifies the hierarchy; in this case, we only have one level
         values='rsvps',        # Values represent the average registrations
-        title='Registrations per Event Group'
+        title='Event Registration Split Per Organizer'
     )
 
     # Show the figure
