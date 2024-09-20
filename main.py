@@ -183,7 +183,7 @@ if st.button("Submit"):
 
     # Create a treemap chart
     tree_fig = px.treemap(
-        average_registrations_event,
+        average_registrations_event.head(50),
         path=['group_name','event_name'],  # Path specifies the hierarchy; in this case, we only have one level
         values='rsvps',        # Values represent the average registrations
         title='Event Registration Split Per Organizer',
