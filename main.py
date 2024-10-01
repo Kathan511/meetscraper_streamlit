@@ -78,7 +78,6 @@ date_range = st.date_input(
     "Date Range",
     (default_start_date, today),
     min_date,
-    max_date,
     format="DD.MM.YYYY",
 )
 
